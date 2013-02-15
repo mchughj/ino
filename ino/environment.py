@@ -57,6 +57,7 @@ class Environment(dict):
     src_dir = 'src'
     lib_dir = 'lib'
     hex_filename = 'firmware.hex'
+    common_lib_dir = None
 
     arduino_dist_dir = None
     arduino_dist_dir_guesses = [
@@ -211,6 +212,9 @@ class Environment(dict):
         parser.add_argument('-d', '--arduino-dist', metavar='PATH', 
                             help='Path to Arduino distribution, e.g. ~/Downloads/arduino-0022.\nTry to guess if not specified')
 
+    def add_common_libs_arg(self, parser):
+        parser.add_argument('-l', '--common-library', help='Path to common libraries')
+
     def serial_port_patterns(self):
         system = platform.system()
         if system == 'Linux':
@@ -243,6 +247,12 @@ class Environment(dict):
         arduino_dist = getattr(args, 'arduino_dist', None)
         if arduino_dist:
             self['arduino_dist_dir'] = arduino_dist
+
+        common_library_dir = getattr(args, 'common_library', None)
+        if common_library_dir:
+            if not os.path.exists(common_library_dir): 
+                raise Abort( 'Common library path does not exist: %s' % common_library_dir );
+            self['common_lib_dir'] = common_library_dir
 
         board_model = getattr(args, 'board_model', None)
         if board_model:

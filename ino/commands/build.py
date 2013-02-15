@@ -43,6 +43,7 @@ class Build(Command):
         super(Build, self).setup_arg_parser(parser)
         self.e.add_board_model_arg(parser)
         self.e.add_arduino_dist_arg(parser)
+        self.e.add_common_libs_arg(parser)
         parser.add_argument('-v', '--verbose', default=False, action='store_true',
                             help='Verbose make output')
 
@@ -59,6 +60,11 @@ class Build(Command):
             self.e.find_arduino_dir('arduino_variants_dir',
                                     ['hardware', 'arduino', 'variants'],
                                     human_name='Arduino variants directory')
+
+        if self.e.common_lib_dir:
+            print 'Using common library directory: ', self.e.common_lib_dir
+        else:
+            print 'No common library directory specified.'
 
         toolset = [
             ('cc', 'avr-gcc'),
@@ -169,6 +175,9 @@ class Build(Command):
         self.e['deps'] = SpaceList()
 
         lib_dirs = [self.e.arduino_core_dir] + list_subdirs(self.e.lib_dir) + list_subdirs(self.e.arduino_libraries_dir)
+        if self.e['common_lib_dir'] != None:
+            lib_dirs += list_subdirs(self.e['common_lib_dir'])
+
         inc_flags = self.recursive_inc_lib_flags(lib_dirs)
 
         # If lib A depends on lib B it have to appear before B in final
